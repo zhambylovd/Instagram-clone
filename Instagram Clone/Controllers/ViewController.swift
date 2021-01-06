@@ -70,7 +70,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             let username = usernameTextField.text, !username.isEmpty,
             let password = passwordTextField.text, password.count >= 6 else { return }
         
-        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self] (result, error) in
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] (result, error) in
             
             guard let self = self else { return }
             
