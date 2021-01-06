@@ -8,13 +8,16 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseDatabase
+import FirebaseStorage
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         let image = UIImage(named: "plus_photo")
         button.setImage(image, for: .normal)
+        button.addTarget(self, action: #selector(handlePlusPhoto), for: .touchUpInside)
         return button
     }()
     
@@ -28,7 +31,7 @@ class ViewController: UIViewController {
         return field
     }()
     
-    let userNameTextField: UITextField = {
+    let usernameTextField: UITextField = {
         let field = UITextField()
         field.placeholder = "User Name"
         field.backgroundColor = UIColor(white: 0, alpha: 0.03)
@@ -64,10 +67,12 @@ class ViewController: UIViewController {
     
     @objc func handleSignUp() {
         guard let email = emailTextField.text, !email.isEmpty,
-            let userName = userNameTextField.text, !userName.isEmpty,
+            let username = usernameTextField.text, !username.isEmpty,
             let password = passwordTextField.text, password.count >= 6 else { return }
         
-        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
+        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self] (result, error) in
+            
+            guard let self = self else { return }
             
             guard let result = result, error == nil else {
                 print("Failed to create user: \(String(describing: error))")
@@ -75,12 +80,66 @@ class ViewController: UIViewController {
             }
             
             print("Successfully created user: \(result.user.uid)")
+             
+            guard let image = self.plusPhotoButton.imageView?.image,
+                let uploadData = image.jpegData(compressionQuality: 0.3) else { return }
+            
+//            FirebaseStorage.Storage.storage().reference().child("profile_picture").putData(uploadData, metadata: nil) { (metadata, error) in
+//
+//                if let error = error {
+//                    print("Failed to upload profile image: \(error)")
+//                    return
+//                }
+//
+//                let profileImageUrl = metadata.
+//
+//                print("Successfully upload profile image")
+//            }
+            
+            let storageRef = Storage.storage().reference().child("profile_images")
+            
+            let filename = UUID().uuidString
+            let riversRef = storageRef.child(filename)
+            
+            riversRef.putData(uploadData, metadata: nil) { (metadata, error) in
+                guard let metadata = metadata, error == nil else {
+                    print("Failed to upload profile image: \(String(describing: error))")
+                    return
+                }
+                
+                riversRef.downloadURL { (url, error) in
+                    guard let url = url, error == nil else {
+                        print("Failed to download url: \(String(describing: error))")
+                        return
+                    }
+                    
+                    let urlString = url.absoluteString
+                    
+                    let dictionaryValues = [
+                        "username": username,
+                        "profile_image": urlString
+                    ]
+                    
+                    let values = [result.user.uid: dictionaryValues]
+
+                    FirebaseDatabase.Database.database().reference().child("users").updateChildValues(values) { (error, ref) in
+                        if let error = error {
+                            print("Failed to save user info into database: \(error)")
+                            return
+                        }
+
+                        print("Successfully saved user info to database")
+                    }
+                }
+                
+                print("Successfully upload profile image to storage")
+            }
         }
     }
     
     @objc func handleTextInputChange() {
         let isFormValid = !(emailTextField.text?.isEmpty ?? false) &&
-            !(userNameTextField.text?.isEmpty ?? false) &&
+            !(usernameTextField.text?.isEmpty ?? false) &&
             passwordTextField.text?.count ?? 0 >= 6
         
         if isFormValid {
@@ -91,6 +150,29 @@ class ViewController: UIViewController {
             signUpButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
         }
         
+    }
+    
+    @objc func handlePlusPhoto() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.allowsEditing = true
+        present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        
+        if let editedImage = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage {
+            plusPhotoButton.setImage(editedImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        } else if let originalImage = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerOriginalImage")] as? UIImage {
+            plusPhotoButton.setImage(originalImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        plusPhotoButton.layer.cornerRadius = plusPhotoButton.frame.width/2
+        plusPhotoButton.layer.masksToBounds = true
+        plusPhotoButton.layer.borderColor = UIColor.black.cgColor
+        plusPhotoButton.layer.borderWidth = 3
+        
+        dismiss(animated: true, completion: nil)
     }
 
     override func viewDidLoad() {
@@ -108,7 +190,7 @@ class ViewController: UIViewController {
     
     fileprivate func setupInputFields() {
         
-        let stackView = UIStackView(arrangedSubviews: [emailTextField, userNameTextField, passwordTextField, signUpButton])
+        let stackView = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signUpButton])
         stackView.axis = .vertical
         stackView.spacing = 10
         stackView.distribution = .fillEqually
