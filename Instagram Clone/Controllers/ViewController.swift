@@ -84,25 +84,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             guard let image = self.plusPhotoButton.imageView?.image,
                 let uploadData = image.jpegData(compressionQuality: 0.3) else { return }
             
-//            FirebaseStorage.Storage.storage().reference().child("profile_picture").putData(uploadData, metadata: nil) { (metadata, error) in
-//
-//                if let error = error {
-//                    print("Failed to upload profile image: \(error)")
-//                    return
-//                }
-//
-//                let profileImageUrl = metadata.
-//
-//                print("Successfully upload profile image")
-//            }
-            
             let storageRef = Storage.storage().reference().child("profile_images")
             
             let filename = UUID().uuidString
             let riversRef = storageRef.child(filename)
             
             riversRef.putData(uploadData, metadata: nil) { (metadata, error) in
-                guard let metadata = metadata, error == nil else {
+                guard error == nil else {
                     print("Failed to upload profile image: \(String(describing: error))")
                     return
                 }
@@ -131,7 +119,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                         print("Successfully saved user info to database")
                     }
                 }
-                
                 print("Successfully upload profile image to storage")
             }
         }
