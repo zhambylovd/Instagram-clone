@@ -7,11 +7,23 @@
 //
 
 import UIKit
+import Firebase
 
 class MainTabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        view.backgroundColor = .white
+        
+        if Auth.auth().currentUser == nil {
+            DispatchQueue.main.async {
+                let navController = UINavigationController(rootViewController: LoginController())
+                navController.modalPresentationStyle = .fullScreen
+                self.present(navController, animated: false, completion: nil)
+            }
+            return
+        }
         
         viewControllers = [
             createNavController(viewController: UserProfileController(), imageName: "profile_unselected", selectedImageName: "profile_selected"),
