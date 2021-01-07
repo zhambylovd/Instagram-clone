@@ -61,9 +61,26 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
         button.isEnabled = false
-        
         return button
     }()
+    
+    let alreadyHaveAccountButton: UIButton = {
+        let button = UIButton(type: .system)
+        
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor: UIColor.lightGray])
+        
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor: UIColor.rgb(red: 17, green: 154, blue: 237)]))
+        
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        
+        button.setTitle("Don't have an account?  Sign Up", for: .normal)
+        button.addTarget(self, action: #selector(handleAlreadyHaveAccount), for: .touchUpInside)
+        return button
+    }()
+    
+    @objc func handleAlreadyHaveAccount() {
+        navigationController?.popViewController(animated: true)
+    }
     
     @objc func handleSignUp() {
         guard let email = emailTextField.text, !email.isEmpty,
@@ -170,6 +187,9 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         view.addSubview(plusPhotoButton)
         plusPhotoButton.anchor(top: view.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: view.frame.height/5, left: 0, bottom: 0, right: 0), size: .init(width: 140, height: 140))
         plusPhotoButton.centerXInSuperview()
+        
+        view.addSubview(alreadyHaveAccountButton)
+        alreadyHaveAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 40, right: 0),size: .init(width: 0, height: 50))
         
         setupInputFields()
         
