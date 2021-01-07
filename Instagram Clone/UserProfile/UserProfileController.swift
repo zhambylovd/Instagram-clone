@@ -36,9 +36,17 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     @objc func handleLogOut() {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { _ in
+        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { [weak self] _ in
+            guard let self = self else { return }
+            
             do {
                 try Auth.auth().signOut()
+                print("Successfully logged out")
+                
+                let navController = UINavigationController(rootViewController: LoginController())
+                navController.modalPresentationStyle = .fullScreen
+                
+                self.present(navController, animated: true, completion: nil)
             } catch let error as NSError {
                 print("Failed to log out: \(error)")
             }

@@ -25,6 +25,10 @@ class MainTabBarController: UITabBarController {
             return
         }
         
+        setupViewControllers()
+    }
+    
+    func setupViewControllers() {
         viewControllers = [
             createNavController(viewController: UserProfileController(), imageName: "profile_unselected", selectedImageName: "profile_selected"),
             createNavController(viewController: UIViewController(), imageName: "apps", selectedImageName: ""),
@@ -35,16 +39,14 @@ class MainTabBarController: UITabBarController {
     fileprivate func createNavController(viewController: UIViewController, imageName: String, selectedImageName: String) -> UIViewController {
         
         viewController.view.backgroundColor = .white
-        viewController.navigationItem.title = title
         
         let navController = UINavigationController(rootViewController: viewController)
-        navController.tabBarItem.title = title
+
         navController.tabBarItem.image = UIImage(named: imageName)
         navController.tabBarItem.selectedImage = UIImage(named: selectedImageName)
         
         tabBar.tintColor = .black
         
         return navController
-    }
-    
+    }   
 }

@@ -134,6 +134,19 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                         }
 
                         print("Successfully saved user info to database")
+                        
+                        let keyWindow = UIApplication.shared.connectedScenes
+                            .filter({$0.activationState == .foregroundActive})
+                            .map({$0 as? UIWindowScene})
+                            .compactMap({$0})
+                            .first?.windows
+                            .filter({$0.isKeyWindow}).first
+                        
+                        guard let mainTabBarController = keyWindow?.rootViewController as? MainTabBarController else { return }
+                        
+                        mainTabBarController.setupViewControllers()
+                        
+                        self.dismiss(animated: true, completion: nil)
                     }
                 }
                 print("Successfully upload profile image to storage")
