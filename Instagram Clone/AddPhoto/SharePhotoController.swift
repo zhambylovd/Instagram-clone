@@ -110,7 +110,7 @@ class SharePhotoController: UIViewController {
             }
             
             print("Successfully save post to database")
-            self.dismiss(animated: true, completion: nil )
+            self.dismiss(animated: true, completion: nil)
         }
     }
 }

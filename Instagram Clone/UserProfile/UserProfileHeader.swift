@@ -11,16 +11,17 @@ import Firebase
 
 class UserProfileHeader: UICollectionViewCell {
     
-    var user: User! {
+    var user: User? {
         didSet {
-            setupProfileImage()
+            guard let profileImageUrl = user?.profileImageUrl else { return }
+            profileImageView.loadImage(urlString: profileImageUrl)
             
             self.usernameLabel.text = user?.username
         }
     }
     
-    let profileImageView: UIImageView = {
-        let iv = UIImageView()
+    let profileImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.layer.cornerRadius = 40
         iv.clipsToBounds = true
         return iv
@@ -148,25 +149,6 @@ class UserProfileHeader: UICollectionViewCell {
         
         bottomDividerView.anchor(top: stackView.bottomAnchor, leading: leadingAnchor, bottom: nil, trailing: trailingAnchor, size: .init(width: 0, height: 0.5))
     }
-    
-    fileprivate func setupProfileImage() {
-        guard let profileImageUrl = user?.profileImageUrl,
-            let url = URL(string: profileImageUrl) else { return }
-        
-        URLSession.shared.dataTask(with: url) { (data, _, error) in
-            guard let data = data, error == nil else {
-                print("Failed to fetch profile image: \(String(describing: error))")
-                return
-            }
-            
-            let image = UIImage(data: data)
-            
-            DispatchQueue.main.async {
-                self.profileImageView.image = image
-            }
-        }.resume()
-    }
-
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
