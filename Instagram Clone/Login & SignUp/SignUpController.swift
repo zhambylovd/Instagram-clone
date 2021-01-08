@@ -112,6 +112,8 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                     return
                 }
                 
+                print("Successfully upload profile image to storage")
+                
                 riversRef.downloadURL { (url, error) in
                     guard let url = url, error == nil else {
                         print("Failed to download url: \(String(describing: error))")
@@ -126,31 +128,34 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                     ]
                     
                     let values = [result.user.uid: dictionaryValues]
-
-                    FirebaseDatabase.Database.database().reference().child("users").updateChildValues(values) { (error, ref) in
-                        if let error = error {
-                            print("Failed to save user info into database: \(error)")
-                            return
-                        }
-
-                        print("Successfully saved user info to database")
-                        
-                        let keyWindow = UIApplication.shared.connectedScenes
-                            .filter({$0.activationState == .foregroundActive})
-                            .map({$0 as? UIWindowScene})
-                            .compactMap({$0})
-                            .first?.windows
-                            .filter({$0.isKeyWindow}).first
-                        
-                        guard let mainTabBarController = keyWindow?.rootViewController as? MainTabBarController else { return }
-                        
-                        mainTabBarController.setupViewControllers()
-                        
-                        self.dismiss(animated: true, completion: nil)
-                    }
+                    
+                    self.saveToDatabaseUserInfo(values: values)
                 }
-                print("Successfully upload profile image to storage")
             }
+        }
+    }
+    
+    fileprivate func saveToDatabaseUserInfo(values: [String: Any]) {
+        FirebaseDatabase.Database.database().reference().child("users").updateChildValues(values) { (error, ref) in
+            if let error = error {
+                print("Failed to save user info into database: \(error)")
+                return
+            }
+
+            print("Successfully saved user info to database")
+            
+            let keyWindow = UIApplication.shared.connectedScenes
+                .filter({$0.activationState == .foregroundActive})
+                .map({$0 as? UIWindowScene})
+                .compactMap({$0})
+                .first?.windows
+                .filter({$0.isKeyWindow}).first
+            
+            guard let mainTabBarController = keyWindow?.rootViewController as? MainTabBarController else { return }
+            
+            mainTabBarController.setupViewControllers()
+            
+            self.dismiss(animated: true, completion: nil)
         }
     }
     
