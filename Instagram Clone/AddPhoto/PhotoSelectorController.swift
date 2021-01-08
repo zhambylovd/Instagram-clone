@@ -17,6 +17,7 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     var images: [UIImage] = []
     var assets: [PHAsset] = []
     var selectedImage: UIImage?
+    var header: PhotoSelectorHeader?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,7 +65,7 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     
     fileprivate func assetsFetchOptions() -> PHFetchOptions {
         let fetchOptions = PHFetchOptions()
-        fetchOptions.fetchLimit = 15
+        fetchOptions.fetchLimit = 30
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchOptions.sortDescriptors = [sortDescriptor]
         return fetchOptions
@@ -73,6 +74,7 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! PhotoSelectorHeader
         
+        self.header = header
         header.photoImageView.image = selectedImage
         
         if let selectedImage = selectedImage {
@@ -114,6 +116,9 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.selectedImage = images[indexPath.item]
         collectionView.reloadData()
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -141,6 +146,8 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     }
     
     @objc func handleNext() {
-        print("Handling next")
+        let vc = SharePhotoController()
+        vc.selectedImage = header?.photoImageView.image
+        navigationController?.pushViewController(vc , animated: true)
     }
 }
