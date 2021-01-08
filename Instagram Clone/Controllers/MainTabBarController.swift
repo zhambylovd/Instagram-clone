@@ -9,12 +9,14 @@
 import UIKit
 import Firebase
 
-class MainTabBarController: UITabBarController {
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
+        
+        self.delegate = self
         
         if Auth.auth().currentUser == nil {
             DispatchQueue.main.async {
@@ -31,9 +33,17 @@ class MainTabBarController: UITabBarController {
     func setupViewControllers() {
         viewControllers = [
             createNavController(viewController: UserProfileController(), imageName: "profile_unselected", selectedImageName: "profile_selected"),
-            createNavController(viewController: UIViewController(), imageName: "apps", selectedImageName: ""),
-            createNavController(viewController: UIViewController(), imageName: "search", selectedImageName: "")
+            createNavController(viewController: UIViewController(), imageName: "home_unselected", selectedImageName: "home_selected"),
+            createNavController(viewController: UIViewController(), imageName: "plus_unselected", selectedImageName: ""),
+            createNavController(viewController: UIViewController(), imageName: "like_unselected", selectedImageName: "like_selected"),
+            createNavController(viewController: UIViewController(), imageName: "search_unselected", selectedImageName: "search_selected")
         ]
+        
+        guard let items = tabBar.items else { return }
+        
+        for item in items {
+            item.imageInsets = UIEdgeInsets(top: 7, left: 0, bottom: -7, right: 0)
+        }
     }
     
     fileprivate func createNavController(viewController: UIViewController, imageName: String, selectedImageName: String) -> UIViewController {
@@ -48,5 +58,18 @@ class MainTabBarController: UITabBarController {
         tabBar.tintColor = .black
         
         return navController
-    }   
+    }
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        let index = viewControllers?.firstIndex(of: viewController)
+        
+        if index == 2 {
+            let navController = UINavigationController(rootViewController: PhotoSelectorController())
+            navController.modalPresentationStyle = .fullScreen
+            present(navController, animated: true, completion: nil)
+            return false
+        }
+        
+        return true
+    }
 }
