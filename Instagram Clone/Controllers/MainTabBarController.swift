@@ -32,8 +32,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     
     func setupViewControllers() {
         viewControllers = [
+            createNavController(viewController: HomeController(), imageName: "home_unselected", selectedImageName: "home_selected"),
             createNavController(viewController: UserProfileController(), imageName: "profile_unselected", selectedImageName: "profile_selected"),
-            createNavController(viewController: UIViewController(), imageName: "home_unselected", selectedImageName: "home_selected"),
             createNavController(viewController: UIViewController(), imageName: "plus_unselected", selectedImageName: ""),
             createNavController(viewController: UIViewController(), imageName: "like_unselected", selectedImageName: "like_selected"),
             createNavController(viewController: UIViewController(), imageName: "search_unselected", selectedImageName: "search_selected")

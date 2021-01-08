@@ -8,13 +8,19 @@
 
 import UIKit
 
+var imageCache: [String: UIImage] = [:]
+
 class CustomImageView: UIImageView {
     
     var lastURLUsedToLoadImage: String?
     
     func loadImage(urlString: String) {
-        print("Loading image...")
         lastURLUsedToLoadImage = urlString
+        
+        if let cachedImage = imageCache[urlString] {
+            self.image = cachedImage
+            return
+        }
         
         guard let url = URL(string: urlString) else { return }
         
@@ -31,6 +37,8 @@ class CustomImageView: UIImageView {
             }
 
             let image = UIImage(data: data)
+            
+            imageCache[url.absoluteString] = image
 
             DispatchQueue.main.async {
                 self.image = image

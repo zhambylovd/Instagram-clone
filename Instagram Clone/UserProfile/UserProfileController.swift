@@ -39,6 +39,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         
         let ref = Database.database().reference().child("posts").child(uid)
         
+        // perhaps later on we'll implement some pagination of data
         ref.queryOrdered(byChild: "creationDate").observe(.childAdded, with: { [weak self] snapshot in
             guard let self = self else { return }
             
