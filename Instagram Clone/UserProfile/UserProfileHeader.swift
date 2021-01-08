@@ -11,7 +11,7 @@ import Firebase
 
 class UserProfileHeader: UICollectionViewCell {
     
-    var user: User? {
+    var user: User! {
         didSet {
             setupProfileImage()
             
