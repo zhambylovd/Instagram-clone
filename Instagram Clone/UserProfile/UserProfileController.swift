@@ -125,18 +125,13 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     fileprivate func fetchUser() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        Database.database().reference().child("users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
-            print(snapshot.value ?? "")
+        Database.fetchUserWithUID(uid: uid) { [weak self] user in
+            guard let self = self else { return }
             
-            guard let dictionary = snapshot.value as? [String: Any] else { return }
-            
-            self.user = User(dictionary: dictionary)
+            self.user = user
             self.navigationItem.title = self.user?.username
             
             self.collectionView?.reloadData()
-        
-        }) { (err) in
-            print("Failed to fetch user:", err)
         }
     }
 }
