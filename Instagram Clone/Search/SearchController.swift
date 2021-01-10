@@ -24,6 +24,7 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         collectionView.backgroundColor = .white
         collectionView.register(SearchCell.self, forCellWithReuseIdentifier: cellId)
         collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .onDrag
         
         setupSearchBar()
         
@@ -39,6 +40,11 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
             guard let dictionaries = snapshot.value as? [String: Any] else { return }
             
             dictionaries.forEach { (key, value) in
+                
+                if key == Auth.auth().currentUser?.uid {
+                    return
+                }
+                
                 guard let userDictionary = value as? [String: Any] else { return }
                 
                 let user = User(uid: key, dictionary: userDictionary)
@@ -83,6 +89,16 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         return cell
     }
     
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let user = filteredUsers[indexPath.item]
+        
+        searchController.searchBar.resignFirstResponder()
+        
+        let vc = UserProfileController()
+        vc.userId = user.uid
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return .init(width: view.frame.width, height: 66)
     }
@@ -91,6 +107,7 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         definesPresentationContext = true
         navigationItem.searchController = self.searchController
         navigationItem.hidesSearchBarWhenScrolling = false
+        searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
     }
 }

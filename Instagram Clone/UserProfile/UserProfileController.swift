@@ -13,12 +13,12 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     
     let cellId = "cellId"
     
+    var userId: String?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         collectionView?.backgroundColor = .white
-        
-        navigationItem.title = Auth.auth().currentUser?.uid
         
         fetchUser()
         
@@ -28,13 +28,13 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         
         setupLogOutButton()
         
-        fetchOrderedPosts()
+//        fetchOrderedPosts()
     }
     
     var posts = [Post]()
     
     fileprivate func fetchOrderedPosts() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = self.user?.uid else { return }
         let ref = Database.database().reference().child("posts").child(uid)
         
         //perhaps later on we'll implement some pagination of data
@@ -123,7 +123,10 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     
     var user: User?
     fileprivate func fetchUser() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
+        
+        let uid = userId ?? currentUserUID
         
         Database.fetchUserWithUID(uid: uid) { [weak self] user in
             guard let self = self else { return }
@@ -132,6 +135,8 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
             self.navigationItem.title = self.user?.username
             
             self.collectionView?.reloadData()
+            
+            self.fetchOrderedPosts()
         }
     }
 }
