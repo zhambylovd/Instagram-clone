@@ -25,6 +25,25 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
         setupNavigationItems()
         
         fetchPosts()
+        fetchFollowingUserIds()
+    }
+    
+    fileprivate func fetchFollowingUserIds() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Database.database().reference().child("following").child(uid).observeSingleEvent(of: .value, with: { snapshot in
+            guard let userIdsDictionary = snapshot.value as? [String: Any] else { return }
+            
+            userIdsDictionary.forEach { (key, value) in
+                Database.fetchUserWithUID(uid: key) { [weak self] user in
+                    guard let self = self else { return }
+                    
+                    self.fetchPostWithUser(user: user)
+                }
+            }
+        }) { error in
+            print("Failed to fetch following users: \(error)")
+        }
     }
     
     func setupNavigationItems() {
@@ -54,6 +73,10 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
                 
                 let post = Post(user: user, dictionary: dictionary)
                 self.posts.append(post)
+            }
+            
+            self.posts.sort { (p1, p2) -> Bool in
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             }
             
             self.collectionView.reloadData()
