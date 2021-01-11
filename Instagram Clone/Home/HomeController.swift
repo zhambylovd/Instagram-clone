@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
+class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
     let cellId = "cellId"
     
@@ -124,6 +124,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell 
         
         cell.post = posts[indexPath.item]
+        cell.delegate = self
         
         return cell
     }
@@ -135,5 +136,11 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
         height += 60
         
         return .init(width: view.frame.width, height: height)
+    }
+    
+    func didTapComment(post: Post) {
+        let vc = CommentsController()
+        vc.modalPresentationStyle = .fullScreen
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
