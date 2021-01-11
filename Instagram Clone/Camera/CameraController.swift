@@ -115,10 +115,10 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate {
         guard let imageData = photo.fileDataRepresentation() else { return }
         let previewImage = UIImage(data: imageData)
         
-        let previewImageView = UIImageView(image: previewImage)
-        
-        view.addSubview(previewImageView)
-        previewImageView.fillSuperview()
+        let containerView = PreviewPhotoContainerView()
+        containerView.previewImageView.image = previewImage
+        view.addSubview(containerView)
+        containerView.fillSuperview()
     }
     
 }
