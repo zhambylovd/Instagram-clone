@@ -144,16 +144,23 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
 
             print("Successfully saved user info to database")
             
-            let keyWindow = UIApplication.shared.connectedScenes
-                .filter({$0.activationState == .foregroundActive})
-                .map({$0 as? UIWindowScene})
-                .compactMap({$0})
-                .first?.windows
-                .filter({$0.isKeyWindow}).first
-            
-            guard let mainTabBarController = keyWindow?.rootViewController as? MainTabBarController else { return }
-            
-            mainTabBarController.setupViewControllers()
+            if #available(iOS 13.0, *) {
+                let keyWindow = UIApplication.shared.connectedScenes
+                    .filter({$0.activationState == .foregroundActive})
+                    .map({$0 as? UIWindowScene})
+                    .compactMap({$0})
+                    .first?.windows
+                    .filter({$0.isKeyWindow}).first
+                
+                guard let mainTabBarController = keyWindow?.rootViewController as? MainTabBarController else { return }
+                
+                mainTabBarController.setupViewControllers()
+            } else {
+                // Fallback on earlier versions
+                guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
+                
+                mainTabBarController.setupViewControllers()
+            }
             
             self.dismiss(animated: true, completion: nil)
         }
@@ -166,7 +173,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         
         if isFormValid {
             signUpButton.isEnabled = true
-            signUpButton.backgroundColor = .link
+            signUpButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
         } else {
             signUpButton.isEnabled = false
             signUpButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
