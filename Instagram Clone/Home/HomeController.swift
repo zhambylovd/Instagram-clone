@@ -18,14 +18,34 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView.backgroundColor = .white
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
         
+        collectionView.backgroundColor = .white
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        
+        collectionView.refreshControl = refreshControl
         
         setupNavigationItems()
         
+        fetchAllPosts()
+    }
+    
+    @objc func handleUpdateFeed() {
+        handleRefresh()
+    }
+    
+    fileprivate func fetchAllPosts() {
         fetchPosts()
         fetchFollowingUserIds()
+    }
+    
+    @objc func handleRefresh() {
+        print("Refreshing...")
+        posts.removeAll()
+        fetchAllPosts()
     }
     
     fileprivate func fetchFollowingUserIds() {
@@ -65,6 +85,8 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout {
         
         ref.observeSingleEvent(of: .value, with: { [weak self] snapshot in
             guard let self = self else { return }
+            
+            self.collectionView.refreshControl?.endRefreshing()
             
             guard let dictionaries = snapshot.value as? [String: Any] else { return }
             
