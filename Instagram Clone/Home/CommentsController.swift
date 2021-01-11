@@ -9,16 +9,25 @@
 import UIKit
 import Firebase
 
-class CommentsController: BaseListController {
+class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout {
     
     var post: Post?
+    var comments: [Comment] = []
+    
+    let cellId = "cellId"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationItem.title = "Comments"
         
-        collectionView.backgroundColor = .green
+        collectionView.backgroundColor = .white
+        collectionView.register(CommentCell.self, forCellWithReuseIdentifier: cellId)
+        
+        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
+        collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
+        
+        fetchComments()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,6 +38,40 @@ class CommentsController: BaseListController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         showTabBar()
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return comments.count
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! CommentCell
+        
+        cell.comment = comments[indexPath.item]
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return .init(width: view.frame.width, height: 50)
+    }
+    
+    fileprivate func fetchComments() {
+        guard let postId = post?.postId else { return }
+        
+        let ref = Database.database().reference().child("comments").child(postId)
+        
+        ref.observe(.childAdded, with: { [weak self] snapshot in
+            guard let self = self else { return }
+            
+            guard let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            let comment = Comment(dictionary: dictionary)
+            self.comments.append(comment)
+            self.collectionView.reloadData()
+        }) { error in
+            print("Failed to fetch comments: \(error)")
+        }
     }
     
     func hideTabBar() {
