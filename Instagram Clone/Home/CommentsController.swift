@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import Firebase
 
 class CommentsController: BaseListController {
+    
+    var post: Post?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,10 +48,28 @@ class CommentsController: BaseListController {
     }
     
     @objc func handleSubmit() {
-        print("submit")
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        guard let text = commentTextField.text,
+            let postId = post?.postId else { return }
+        
+        let values = [
+            "uid": uid,
+            "text": text,
+            "creationDate": Date().timeIntervalSince1970
+            ] as [String : Any]
+        
+        Database.database().reference().child("comments").child(postId).childByAutoId().updateChildValues(values) { (error, ref) in
+            if let error = error {
+                print("Failed to insert comment to database: \(error)")
+                return
+            }
+            
+            print("Successfully inserted comment to database")
+        }
     }
     
-    var containerView: UIView = {
+    lazy var containerView: UIView = {
         let containerView = UIView()
         containerView.backgroundColor = .white
         containerView.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
@@ -59,17 +80,20 @@ class CommentsController: BaseListController {
         submitButton.titleLabel?.font = .boldSystemFont(ofSize: 14)
         submitButton.addTarget(self, action: #selector(handleSubmit), for: .touchUpInside)
         
-        let textField = UITextField()
-        textField.placeholder = "Enter Comment"
-        
-        containerView.addSubview(textField)
+        containerView.addSubview(commentTextField)
         containerView.addSubview(submitButton)
         
-        textField.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: containerView.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 0, left: 12, bottom: 0, right: 0))
+        commentTextField.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: containerView.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 0, left: 12, bottom: 0, right: 0))
         
         submitButton.anchor(top: containerView.topAnchor, leading: nil, bottom: containerView.bottomAnchor, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 0))
         
         return containerView
+    }()
+    
+    let commentTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Enter comment"
+        return tf
     }()
     
     override var inputAccessoryView: UIView? {

@@ -102,7 +102,9 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
             dictionaries.forEach { (key, value) in
                 guard let dictionary = value as? [String: Any] else { return }
                 
-                let post = Post(user: user, dictionary: dictionary)
+                var post = Post(user: user, dictionary: dictionary)
+                post.postId = key
+                
                 self.posts.append(post)
             }
             
@@ -140,6 +142,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
     
     func didTapComment(post: Post) {
         let vc = CommentsController()
+        vc.post = post
         vc.modalPresentationStyle = .fullScreen
         navigationController?.pushViewController(vc, animated: true)
     }
