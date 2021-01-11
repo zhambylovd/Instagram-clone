@@ -23,6 +23,8 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         
         collectionView.backgroundColor = .white
         collectionView.register(CommentCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .interactive
         
         collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
         collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
@@ -53,7 +55,20 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return .init(width: view.frame.width, height: 50)
+        let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 50)
+        let dummyCell = CommentCell(frame: frame)
+        dummyCell.comment = comments[indexPath.item]
+        dummyCell.layoutIfNeeded()
+        
+        let targetSize = CGSize(width: view.frame.width, height: 1000)
+        let estimatedSize = dummyCell.systemLayoutSizeFitting(targetSize)
+        
+        let height = max(40 + 8 + 8, estimatedSize.height)
+        return CGSize(width: view.frame.width, height: height)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
     }
     
     fileprivate func fetchComments() {
@@ -64,11 +79,16 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         ref.observe(.childAdded, with: { [weak self] snapshot in
             guard let self = self else { return }
             
-            guard let dictionary = snapshot.value as? [String: Any] else { return }
+            guard let dictionary = snapshot.value as? [String: Any],
+                let uid = dictionary["uid"] as? String else { return }
             
-            let comment = Comment(dictionary: dictionary)
-            self.comments.append(comment)
-            self.collectionView.reloadData()
+            Database.fetchUserWithUID(uid: uid) { [weak self] user in
+                guard let self = self else { return }
+                
+                var comment = Comment(user: user, dictionary: dictionary)
+                self.comments.append(comment)
+                self.collectionView.reloadData()
+            }
         }) { error in
             print("Failed to fetch comments: \(error)")
         }
@@ -129,6 +149,12 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         commentTextField.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: containerView.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 0, left: 12, bottom: 0, right: 0))
         
         submitButton.anchor(top: containerView.topAnchor, leading: nil, bottom: containerView.bottomAnchor, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 0))
+        
+        let lineSeparatorView = UIView()
+        lineSeparatorView.backgroundColor = UIColor.rgb(red: 230, green: 230, blue: 230)
+        containerView.addSubview(lineSeparatorView)
+        
+        lineSeparatorView.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: nil, trailing: containerView.trailingAnchor, size: .init(width: 0, height: 0.5))
         
         return containerView
     }()
