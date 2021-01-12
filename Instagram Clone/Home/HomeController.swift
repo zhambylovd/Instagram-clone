@@ -144,10 +144,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        var height: CGFloat = view.frame.width + 56
-        height += 50
-        height += 60
-        
+        var height: CGFloat = view.frame.width + 166        
         return .init(width: view.frame.width, height: height)
     }
     
