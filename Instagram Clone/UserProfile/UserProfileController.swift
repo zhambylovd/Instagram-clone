@@ -39,25 +39,27 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         guard let uid = self.user?.uid else { return }
         
         let ref = Database.database().reference().child("posts").child(uid)
-        var query = ref.queryOrderedByKey()
+        var query = ref.queryOrdered(byChild: "creationDate")
         
         if posts.count > 0 {
-            let value = posts.last?.id
-            query = query.queryStarting(atValue: value)
+            let value = posts.last?.creationDate.timeIntervalSince1970
+            query = query.queryEnding(atValue: value)
         }
         
-        query.queryLimited(toFirst: 4).observeSingleEvent(of: .value, with: { [weak self] snapshot in
+        query.queryLimited(toLast: 4).observeSingleEvent(of: .value, with: { [weak self] snapshot in
             guard let self = self else { return }
             
             guard var allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
             guard let user = self.user else { return }
             
-            if allObjects.count < 4 {
-                self.isFinishedPaging = true
+            allObjects.reverse()
+            
+            if self.posts.count > 0 && allObjects.count > 0 {
+                allObjects.removeFirst()
             }
             
-            if self.posts.count > 0 {
-                allObjects.removeFirst()
+            if allObjects.count < 4 {
+                self.isFinishedPaging = true
             }
             
             allObjects.forEach({ snapshot in
