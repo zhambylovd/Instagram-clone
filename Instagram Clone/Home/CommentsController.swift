@@ -72,7 +72,7 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
     }
     
     fileprivate func fetchComments() {
-        guard let postId = post?.postId else { return }
+        guard let postId = post?.id else { return }
         
         let ref = Database.database().reference().child("comments").child(postId)
         
@@ -85,7 +85,7 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
             Database.fetchUserWithUID(uid: uid) { [weak self] user in
                 guard let self = self else { return }
                 
-                var comment = Comment(user: user, dictionary: dictionary)
+                let comment = Comment(user: user, dictionary: dictionary)
                 self.comments.append(comment)
                 self.collectionView.reloadData()
             }
@@ -114,7 +114,7 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         guard let text = commentTextField.text,
-            let postId = post?.postId else { return }
+            let postId = post?.id else { return }
         
         let values = [
             "uid": uid,

@@ -103,7 +103,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
                 guard let dictionary = value as? [String: Any] else { return }
                 
                 var post = Post(user: user, dictionary: dictionary)
-                post.postId = key
+                post.id = key
                 
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 let ref = Database.database().reference().child("likes").child(key).child(uid)
@@ -144,7 +144,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        var height: CGFloat = view.frame.width + 166        
+        let height: CGFloat = view.frame.width + 166        
         return .init(width: view.frame.width, height: height)
     }
     
@@ -160,7 +160,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
         
         var post = posts[indexPath.item]
         
-        guard let postId = post.postId else { return }
+        guard let postId = post.id else { return }
         
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
