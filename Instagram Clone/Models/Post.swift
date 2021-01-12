@@ -10,6 +10,7 @@ import Foundation
 
 struct Post {
     var postId: String?
+    var hasLiked = false
     
     let imageUrl: String
     let user: User
