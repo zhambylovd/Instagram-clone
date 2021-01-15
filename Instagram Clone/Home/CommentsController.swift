@@ -26,9 +26,6 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         collectionView.alwaysBounceVertical = true
         collectionView.keyboardDismissMode = .interactive
         
-        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
-        collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
-        
         fetchComments()
     }
     
