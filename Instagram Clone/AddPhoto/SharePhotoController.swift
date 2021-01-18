@@ -11,8 +11,10 @@ import Firebase
 
 class SharePhotoController: UIViewController {
     
+    // MARK: - Static properties
     static let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
     
+    // MARK: - Properties
     var selectedImage: UIImage? {
         didSet {
             imageView.image = selectedImage
@@ -33,6 +35,7 @@ class SharePhotoController: UIViewController {
         return tv
     }()
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.rgb(red: 240, green: 240, blue: 240)
@@ -42,6 +45,7 @@ class SharePhotoController: UIViewController {
         setupImageAndTextViews()
     }
     
+    // MARK: - Image and text views
     fileprivate func setupImageAndTextViews() {
         let containerView = UIView()
         containerView.backgroundColor = .white
@@ -56,6 +60,36 @@ class SharePhotoController: UIViewController {
         textView.anchor(top: containerView.topAnchor, leading: imageView.trailingAnchor, bottom: containerView.bottomAnchor, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 4, bottom: 0, right: 0))
     }
     
+    // MARK: - Save to Database
+    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String, postImage: UIImage, caption: String) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        let userPostRef = Database.database().reference().child("posts").child(uid)
+        let ref = userPostRef.childByAutoId()
+        
+        let values = [
+            "imageUrl": imageUrl,
+            "caption": caption,
+            "imageWidth": postImage.size.width,
+            "imageHeight": postImage.size.height,
+            "creationDate": Date().timeIntervalSince1970
+            ] as [String : Any]
+        
+        ref.updateChildValues(values) { (err, ref) in
+            if let err = err {
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                print("Failed to save post to database: \(err)")
+                return
+            }
+            
+            print("Successfully save post to database")
+            self.dismiss(animated: true, completion: nil)
+            
+            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
+        }
+    }
+    
+    // MARK: - Action functions
     @objc func handleShare() {
         guard let caption = textView.text, !caption.isEmpty,
             let image = selectedImage,
@@ -87,34 +121,6 @@ class SharePhotoController: UIViewController {
                 
                 self.saveToDatabaseWithImageUrl(imageUrl: urlString, postImage: image, caption: caption)
             }
-        }
-    }
-    
-    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String, postImage: UIImage, caption: String) {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        
-        let userPostRef = Database.database().reference().child("posts").child(uid)
-        let ref = userPostRef.childByAutoId()
-        
-        let values = [
-            "imageUrl": imageUrl,
-            "caption": caption,
-            "imageWidth": postImage.size.width,
-            "imageHeight": postImage.size.height,
-            "creationDate": Date().timeIntervalSince1970
-            ] as [String : Any]
-        
-        ref.updateChildValues(values) { (err, ref) in
-            if let err = err {
-                self.navigationItem.rightBarButtonItem?.isEnabled = true
-                print("Failed to save post to database: \(err)")
-                return
-            }
-            
-            print("Successfully save post to database")
-            self.dismiss(animated: true, completion: nil)
-            
-            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
         }
     }
 }

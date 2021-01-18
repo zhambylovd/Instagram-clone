@@ -11,6 +11,7 @@ import Photos
 
 class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowLayout {
     
+    // MARK: - Properties
     let cellId = "cellId"
     let headerId = "headerId"
     
@@ -19,6 +20,8 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
     var selectedImage: UIImage?
     var header: PhotoSelectorHeader?
     
+    
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -32,6 +35,7 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
         fetchPhotos()
     }
     
+    // MARK: - Fetch photos
     fileprivate func fetchPhotos() {
         let allPhotos = PHAsset.fetchAssets(with: .image, options: assetsFetchOptions())
         DispatchQueue.global(qos: .background).async {
@@ -71,6 +75,26 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
         return fetchOptions
     }
     
+    // MARK: - Navigation buttons
+    fileprivate func setupNavigationButtons() {
+        navigationController?.navigationBar.tintColor = .black
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
+    }
+    
+    // MARK: - Action functions
+    @objc func handleCancel() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func handleNext() {
+        let vc = SharePhotoController()
+        vc.selectedImage = header?.photoImageView.image
+        navigationController?.pushViewController(vc , animated: true)
+    }
+    
+    // MARK: - Header functions
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! PhotoSelectorHeader
         
@@ -92,15 +116,12 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
         return header
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return .init(top: 1, left: 0, bottom: 0, right: 0)
-    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let width = view.frame.width
         return .init(width: width, height: width)
     }
     
+    // MARK: - Collection view functions
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return images.count
     }
@@ -134,20 +155,7 @@ class PhotoSelectorController: BaseListController, UICollectionViewDelegateFlowL
         return 1
     }
     
-    fileprivate func setupNavigationButtons() {
-        navigationController?.navigationBar.tintColor = .black
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
-    }
-    
-    @objc func handleCancel() {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    @objc func handleNext() {
-        let vc = SharePhotoController()
-        vc.selectedImage = header?.photoImageView.image
-        navigationController?.pushViewController(vc , animated: true)
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return .init(top: 1, left: 0, bottom: 0, right: 0)
     }
 }

@@ -10,6 +10,7 @@ import UIKit
 
 class CommentCell: UICollectionViewCell {
     
+    // MARK: - Properties
     var comment: Comment? {
         didSet {
             guard let comment = comment else { return }
@@ -38,6 +39,7 @@ class CommentCell: UICollectionViewCell {
         return tv
     }()
     
+    // MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         

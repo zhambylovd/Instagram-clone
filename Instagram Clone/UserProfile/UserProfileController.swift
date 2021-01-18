@@ -11,6 +11,7 @@ import Firebase
 
 class UserProfileController: BaseListController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate {
     
+    // MARK: - Properties
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
     let headerId = "headerId"
@@ -21,6 +22,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     var isGridView = true
     var isFinishedPaging = false
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -35,6 +37,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         setupLogOutButton()
     }
     
+    // MARK: - Pagination
     fileprivate func paginatePosts() {
         guard let uid = self.user?.uid else { return }
         
@@ -76,6 +79,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         }
     }
     
+    // MARK: - Log Out
     fileprivate func setupLogOutButton() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
     }
@@ -99,6 +103,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         present(alertController, animated: true, completion: nil)
     }
     
+    // MARK: - Collection view methods
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return posts.count
     }
@@ -138,6 +143,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         }
     }
     
+    // MARK: - Header methods
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! UserProfileHeader
         
@@ -169,6 +175,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         }
     }
     
+    // MARK: - UserProfileHeaderDelegate
     func didChangeToListView() {
         isGridView = false
         collectionView.reloadData()

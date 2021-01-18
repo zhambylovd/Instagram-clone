@@ -16,6 +16,7 @@ protocol UserProfileHeaderDelegate {
 
 class UserProfileHeader: UICollectionViewCell {
     
+    // MARK: - Properties
     var delegate: UserProfileHeaderDelegate?
     
     var user: User? {
@@ -114,6 +115,7 @@ class UserProfileHeader: UICollectionViewCell {
         return button
     }()
     
+    // MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -131,6 +133,12 @@ class UserProfileHeader: UICollectionViewCell {
         editProfileFollowButton.anchor(top: postLabel.bottomAnchor, leading: postLabel.leadingAnchor, bottom: nil, trailing: followingLabel.trailingAnchor, padding: .init(top: 2, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 34))
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    
+    // MARK: - Fileprivate functions
     fileprivate func setupUserStatsView() {
         let stackView = UIStackView(arrangedSubviews: [postLabel, followersLabel, followingLabel])
         stackView.distribution = .fillEqually
@@ -185,6 +193,14 @@ class UserProfileHeader: UICollectionViewCell {
         }
     }
     
+    fileprivate func setupFollowStyle() {
+        self.editProfileFollowButton.setTitle("Follow", for: .normal)
+        self.editProfileFollowButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+        self.editProfileFollowButton.setTitleColor(.white, for: .normal)
+        self.editProfileFollowButton.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
+    }
+    
+    // MARK: - Action functions
     @objc func handleEditProfileOrFollow() {
         guard let currentLoggedInUserId = Auth.auth().currentUser?.uid else { return }
         
@@ -236,16 +252,5 @@ class UserProfileHeader: UICollectionViewCell {
         listButton.tintColor = UIColor(white: 0, alpha: 0.2)
         
         delegate?.didChangeToGridView()
-    }
-    
-    fileprivate func setupFollowStyle() {
-        self.editProfileFollowButton.setTitle("Follow", for: .normal)
-        self.editProfileFollowButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
-        self.editProfileFollowButton.setTitleColor(.white, for: .normal)
-        self.editProfileFollowButton.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

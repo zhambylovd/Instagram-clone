@@ -11,13 +11,14 @@ import Firebase
 
 class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, UISearchBarDelegate {
     
+    // MARK: - Properties
     var users: [User] = []
     var filteredUsers: [User] = []
     
     fileprivate let searchController = UISearchController(searchResultsController: nil)
-    
     let cellId = "cellId"
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,16 +28,15 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         collectionView.keyboardDismissMode = .onDrag
         
         setupSearchBar()
-        
         fetchUsers()
     }
     
+    // MARK: - Fetch users
     fileprivate func fetchUsers() {
         let ref = Database.database().reference().child("users")
         
         ref.observeSingleEvent(of: .value, with: { [weak self] snapshot in
             guard let self = self else { return }
-            
             guard let dictionaries = snapshot.value as? [String: Any] else { return }
             
             dictionaries.forEach { (key, value) in
@@ -46,9 +46,7 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
                 }
                 
                 guard let userDictionary = value as? [String: Any] else { return }
-                
                 let user = User(uid: key, dictionary: userDictionary)
-                
                 self.users.append(user)
             }
             
@@ -64,6 +62,15 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         }
     }
     
+    // MARK: - Search users
+    fileprivate func setupSearchBar() {
+        definesPresentationContext = true
+        navigationItem.searchController = self.searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.delegate = self
+    }
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         
         if searchText.isEmpty {
@@ -77,6 +84,7 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
         self.collectionView.reloadData()
     }
     
+    // MARK: - Collection view methods
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return filteredUsers.count
     }
@@ -101,13 +109,5 @@ class SearchController: BaseListController, UICollectionViewDelegateFlowLayout, 
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return .init(width: view.frame.width, height: 66)
-    }
-    
-    fileprivate func setupSearchBar() {
-        definesPresentationContext = true
-        navigationItem.searchController = self.searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.delegate = self
     }
 }

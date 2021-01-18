@@ -14,6 +14,7 @@ protocol CommentInputAccessoryViewDelegate {
 
 class CommentInputAccessoryView: UIView {
     
+    // MARK: - Properties
     var delegate: CommentInputAccessoryViewDelegate?
     
     fileprivate let submitButton: UIButton = {
@@ -27,16 +28,20 @@ class CommentInputAccessoryView: UIView {
     
     fileprivate let commentTextView: UITextView = {
         let tv = UITextView()
-//        tv.placeholder = "Enter comment"
         tv.isScrollEnabled = false
         tv.font = .systemFont(ofSize: 18)
         return tv
     }()
     
+    // MARK: - Override properties
+    override var intrinsicContentSize: CGSize {
+        return .zero
+    }
+    
+    // MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        //1
         autoresizingMask = .flexibleHeight
         
         backgroundColor = .white
@@ -46,17 +51,16 @@ class CommentInputAccessoryView: UIView {
         
         submitButton.anchor(top: topAnchor, leading: nil, bottom: nil, trailing: trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 50))
         
-        //3
         commentTextView.anchor(top: topAnchor, leading: leadingAnchor, bottom: safeAreaLayoutGuide.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 8, left: 8, bottom: 8, right: 0))
         
         setupLineSeparatorView()
     }
     
-    //2
-    override var intrinsicContentSize: CGSize {
-        return .zero
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Some methods
     func clearCommentTextField() {
         commentTextView.text = nil
     }
@@ -69,13 +73,10 @@ class CommentInputAccessoryView: UIView {
         lineSeparatorView.anchor(top: topAnchor, leading: leadingAnchor, bottom: nil, trailing: trailingAnchor, size: .init(width: 0, height: 0.5))
     }
     
+    // MARK: - Action functions
     @objc func handleSubmit() {
         guard let comment = commentTextView.text else { return }
         
         delegate?.didSubmit(for: comment)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

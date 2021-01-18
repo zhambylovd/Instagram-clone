@@ -9,8 +9,9 @@
 import UIKit
 import Firebase
 
-class LoginController: UIViewController {
+class LoginController: UIViewController, UITextFieldDelegate {
     
+    // MARK: - Properties
     let logoContainerView: UIView = {
         let view = UIView()
         
@@ -75,10 +76,12 @@ class LoginController: UIViewController {
         return button
     }()
     
+    // MARK: - Override properties
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -93,14 +96,16 @@ class LoginController: UIViewController {
         view.addGestureRecognizer(tap)
         
         view.addSubview(logoContainerView)
-        logoContainerView.anchor(top: view.topAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, size: .init(width: 0, height: 200))
+        logoContainerView.anchor(top: view.topAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, size: .init(width: 0, height: 250))
+        
+        setupInputFields()
         
         view.addSubview(dontHaveAccountButton)
         dontHaveAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 40, right: 0), size: .init(width: 0, height: 50))
         
-        setupInputFields()
     }
     
+    // MARK: - Fileprivate functions
     fileprivate func setupInputFields() {
         let stackView = UIStackView(arrangedSubviews: [emailTextField, passwordTextField, loginButton])
         stackView.axis = .vertical
@@ -109,9 +114,16 @@ class LoginController: UIViewController {
         
         view.addSubview(stackView)
         
-        stackView.anchor(top: logoContainerView.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 40, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 140))
+        stackView.anchor(top: logoContainerView.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 120, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 140))
     }
     
+    fileprivate func alertLoginError(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Action functions
     @objc func handleShowSignUp() {
         let vc = SignUpController()
         navigationController?.pushViewController(vc, animated: true)
@@ -171,14 +183,7 @@ class LoginController: UIViewController {
         }
     }
     
-    fileprivate func alertLoginError(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
-        present(alert, animated: true)
-    }
-}
-
-extension LoginController: UITextFieldDelegate {
+    // MARK: - UITextFieldDelegate
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == emailTextField {
             passwordTextField.becomeFirstResponder()

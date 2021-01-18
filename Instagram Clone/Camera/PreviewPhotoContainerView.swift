@@ -11,6 +11,7 @@ import Photos
 
 class PreviewPhotoContainerView: UIView {
     
+    // MARK: - Properties
     let previewImageView: UIImageView = {
         let iv = UIImageView()
         return iv
@@ -30,6 +31,26 @@ class PreviewPhotoContainerView: UIView {
         return button
     }()
     
+    // MARK: - Initializer
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        addSubview(previewImageView)
+        addSubview(cancelButton)
+        addSubview(saveButton)
+        
+        previewImageView.fillSuperview()
+        
+        cancelButton.anchor(top: topAnchor, leading: leadingAnchor, bottom: nil, trailing: nil, padding: .init(top: 12, left: 12, bottom: 0, right: 0), size: .init(width: 50, height: 50))
+        
+        saveButton.anchor(top: nil, leading: leadingAnchor, bottom: bottomAnchor, trailing: nil, padding: .init(top: 0, left: 24, bottom: 24, right: 0), size: .init(width: 50, height: 50))
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Action functions
     @objc func handleCancel() {
         self.removeFromSuperview()
     }
@@ -86,23 +107,4 @@ class PreviewPhotoContainerView: UIView {
             }
         }
     }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        addSubview(previewImageView)
-        addSubview(cancelButton)
-        addSubview(saveButton)
-        
-        previewImageView.fillSuperview()
-        
-        cancelButton.anchor(top: topAnchor, leading: leadingAnchor, bottom: nil, trailing: nil, padding: .init(top: 12, left: 12, bottom: 0, right: 0), size: .init(width: 50, height: 50))
-        
-        saveButton.anchor(top: nil, leading: leadingAnchor, bottom: bottomAnchor, trailing: nil, padding: .init(top: 0, left: 24, bottom: 24, right: 0), size: .init(width: 50, height: 50))
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
 }

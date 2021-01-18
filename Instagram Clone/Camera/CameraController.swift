@@ -11,6 +11,7 @@ import AVFoundation
 
 class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewControllerTransitioningDelegate {
     
+    // MARK: - Properties
     let dismissButton: UIButton = {
         let button = UIButton()
         button.setImage(#imageLiteral(resourceName: "right_arrow_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
@@ -29,6 +30,7 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
     let customAnimationPresentor = CustomAnimationPresentor()
     let customAnimationDismisser = CustomAnimationDismisser()
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -37,28 +39,7 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         openCamera()
     }
     
-    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return customAnimationPresentor
-    }
-    
-    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return customAnimationDismisser
-    }
-
-    fileprivate func setupHUD() {
-        view.addSubview(capturePhotoButton)
-        view.addSubview(dismissButton)
-
-        capturePhotoButton.centerXInSuperview()
-        capturePhotoButton.anchor(top: nil, leading: nil, bottom: view.bottomAnchor, trailing: nil, padding: .init(top: 0, left: 0, bottom: 40, right: 0), size: .init(width: 80, height: 80))
-
-        dismissButton.anchor(top: view.topAnchor, leading: nil, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 12, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 50))
-    }
-    
-    @objc func handleDismiss() {
-        dismiss(animated: true, completion: nil)
-    }
-    
+    // MARK: - Fileprivate functions
     fileprivate func openCamera() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized: // the user has already authorized to access the camera
@@ -115,6 +96,17 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         }
     }
     
+    fileprivate func setupHUD() {
+        view.addSubview(capturePhotoButton)
+        view.addSubview(dismissButton)
+
+        capturePhotoButton.centerXInSuperview()
+        capturePhotoButton.anchor(top: nil, leading: nil, bottom: view.bottomAnchor, trailing: nil, padding: .init(top: 0, left: 0, bottom: 40, right: 0), size: .init(width: 80, height: 80))
+
+        dismissButton.anchor(top: view.topAnchor, leading: nil, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 12, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 50))
+    }
+    
+    // MARK: - Action functions
     @objc func handleTakePhoto() {
         let photoSettings = AVCapturePhotoSettings()
         if let photoPreviewType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
@@ -123,6 +115,20 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         }
     }
     
+    @objc func handleDismiss() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // MARK: - UIViewControllerTransitioningDelegate
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return customAnimationPresentor
+    }
+    
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return customAnimationDismisser
+    }
+    
+    // MARK: - AVCapturePhotoCaptureDelegate
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard let imageData = photo.fileDataRepresentation() else { return }
         let previewImage = UIImage(data: imageData)
@@ -132,5 +138,4 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         view.addSubview(containerView)
         containerView.fillSuperview()
     }
-    
 }

@@ -11,10 +11,12 @@ import Firebase
 
 class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
+    // MARK: - Properties
     let cellId = "cellId"
     
     var posts: [Post] = []
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,23 +31,13 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
         collectionView.refreshControl = refreshControl
         
         setupNavigationItems()
-        
         fetchAllPosts()
     }
     
-    @objc func handleUpdateFeed() {
-        handleRefresh()
-    }
-    
+    // MARK: - Fetch posts and user ids
     fileprivate func fetchAllPosts() {
         fetchPosts()
         fetchFollowingUserIds()
-    }
-    
-    @objc func handleRefresh() {
-        print("Refreshing...")
-        posts.removeAll()
-        fetchAllPosts()
     }
     
     fileprivate func fetchFollowingUserIds() {
@@ -64,19 +56,6 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
         }) { error in
             print("Failed to fetch following users: \(error)")
         }
-    }
-    
-    func setupNavigationItems() {
-        navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo2"))
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
-    }
-    
-    @objc func handleCamera() {
-        let vc = CameraController()
-        vc.modalPresentationStyle = .fullScreen
-        
-        present(vc, animated: true, completion: nil)
     }
     
     fileprivate func fetchPosts() {
@@ -129,6 +108,31 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
         }
     }
     
+    // MARK: - Navigation items
+    func setupNavigationItems() {
+        navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo2"))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
+    }
+    
+    // MARK: - Action functions
+    @objc func handleUpdateFeed() {
+        handleRefresh()
+    }
+    
+    
+    @objc func handleRefresh() {
+        print("Refreshing...")
+        posts.removeAll()
+        fetchAllPosts()
+    }
+    
+    @objc func handleCamera() {
+        let vc = CameraController()
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true, completion: nil)
+    }
+    
+    // MARK: - Collection view methods
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return posts.count
     }
@@ -148,6 +152,7 @@ class HomeController: BaseListController, UICollectionViewDelegateFlowLayout, Ho
         return .init(width: view.frame.width, height: height)
     }
     
+    // MARK: - HomePostCellDelegate
     func didTapComment(post: Post) {
         let vc = CommentsController()
         vc.post = post

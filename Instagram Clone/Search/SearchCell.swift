@@ -10,6 +10,7 @@ import UIKit
 
 class SearchCell: UICollectionViewCell {
     
+    // MARK: - Properties
     var user: User? {
         didSet {
             guard let username = user?.username,
@@ -35,6 +36,7 @@ class SearchCell: UICollectionViewCell {
         return label
     }()
     
+    // MARK: - Initializer
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -48,13 +50,18 @@ class SearchCell: UICollectionViewCell {
         
         usernameLabel.anchor(top: topAnchor, leading: profileImageView.trailingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, padding: .init(top: 0, left: 8, bottom: 0, right: 0))
         
-        let seperatorView = UIView()
-        seperatorView.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        addSubview(seperatorView)
-        seperatorView.anchor(top: nil, leading: usernameLabel.leadingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, size: .init(width: 0, height: 0.5))
+        setupSeparatorView()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Separator
+    fileprivate func setupSeparatorView() {
+        let seperatorView = UIView()
+        seperatorView.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        addSubview(seperatorView)
+        seperatorView.anchor(top: nil, leading: usernameLabel.leadingAnchor, bottom: bottomAnchor, trailing: trailingAnchor, size: .init(width: 0, height: 0.5))
     }
 }

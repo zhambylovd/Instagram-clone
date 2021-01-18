@@ -11,8 +11,9 @@ import FirebaseAuth
 import FirebaseDatabase
 import FirebaseStorage
 
-class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
+    // MARK: - Properties
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         let image = UIImage(named: "plus_photo")
@@ -81,6 +82,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         return button
     }()
     
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,10 +106,26 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         setupInputFields()
     }
     
-    @objc func handleAlreadyHaveAccount() {
-        navigationController?.popViewController(animated: true)
+    // MARK: - Fileprivate functions
+    fileprivate func alertSignUpError(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
+        present(alert, animated: true)
     }
     
+    fileprivate func setupInputFields() {
+        let stackView = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signUpButton])
+        stackView.axis = .vertical
+        stackView.spacing = 10
+        stackView.distribution = .fillEqually
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        view.addSubview(stackView)
+        stackView.anchor(top: plusPhotoButton.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 20, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 200))
+    }
+    
+    // MARK: - Sign Up
     @objc func handleSignUp() {
         emailTextField.resignFirstResponder()
         usernameTextField.resignFirstResponder()
@@ -171,12 +189,6 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         }
     }
     
-    fileprivate func alertSignUpError(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
-        present(alert, animated: true)
-    }
-    
     fileprivate func saveToDatabaseUserInfo(values: [String: Any]) {
         FirebaseDatabase.Database.database().reference().child("users").updateChildValues(values) { (error, ref) in
             if let error = error {
@@ -207,6 +219,11 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         }
     }
     
+    // MARK: - Action functions
+    @objc func handleAlreadyHaveAccount() {
+        navigationController?.popViewController(animated: true)
+    }
+    
     @objc func handleTextInputChange() {
         let isFormValid = !(emailTextField.text?.isEmpty ?? false) &&
             !(usernameTextField.text?.isEmpty ?? false) &&
@@ -229,6 +246,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         present(imagePickerController, animated: true, completion: nil)
     }
     
+    // MARK: - UIImagePickerControllerDelegate
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         if let editedImage = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage {
@@ -245,20 +263,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         dismiss(animated: true, completion: nil)
     }
     
-    fileprivate func setupInputFields() {
-        let stackView = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signUpButton])
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        stackView.distribution = .fillEqually
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        view.addSubview(stackView)
-        stackView.anchor(top: plusPhotoButton.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 20, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 200))
-    }
-}
-
-extension SignUpController: UITextFieldDelegate {
+    // MARK: - UITextFieldDelegate
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == emailTextField {
             usernameTextField.becomeFirstResponder()

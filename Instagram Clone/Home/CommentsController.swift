@@ -11,11 +11,31 @@ import Firebase
 
 class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout, CommentInputAccessoryViewDelegate {
 
+    // MARK: - Properties
     var post: Post?
     var comments: [Comment] = []
     
+    lazy var containerView: CommentInputAccessoryView = {
+        let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 50)
+        let commentInputAccessoryView = CommentInputAccessoryView(frame: frame)
+        commentInputAccessoryView.delegate = self
+        return commentInputAccessoryView
+    }()
+    
     let cellId = "cellId"
     
+    // MARK: - Override properties
+    override var inputAccessoryView: UIView? {
+        get {
+            return containerView
+        }
+    }
+    
+    override var canBecomeFirstResponder: Bool {
+        return true
+    }
+    
+    // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -39,6 +59,48 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         showTabBar()
     }
     
+    // MARK: - Fetch comments
+    fileprivate func fetchComments() {
+        guard let postId = post?.id else { return }
+        
+        let ref = Database.database().reference().child("comments").child(postId)
+        
+        ref.observe(.childAdded, with: { [weak self] snapshot in
+            guard let self = self else { return }
+            
+            guard let dictionary = snapshot.value as? [String: Any],
+                let uid = dictionary["uid"] as? String else { return }
+            
+            Database.fetchUserWithUID(uid: uid) { [weak self] user in
+                guard let self = self else { return }
+                
+                let comment = Comment(user: user, dictionary: dictionary)
+                self.comments.append(comment)
+                self.collectionView.reloadData()
+            }
+        }) { error in
+            print("Failed to fetch comments: \(error)")
+        }
+    }
+    
+    // MARK: - show, hide tabBar
+    func hideTabBar() {
+        var frame = self.tabBarController?.tabBar.frame
+        frame!.origin.y = self.view.frame.size.height + (frame?.size.height)!
+        UIView.animate(withDuration: 0.5, animations: {
+            self.tabBarController?.tabBar.frame = frame!
+        })
+    }
+
+    func showTabBar() {
+        var frame = self.tabBarController?.tabBar.frame
+        frame!.origin.y = self.view.frame.size.height - (frame?.size.height)!
+        UIView.animate(withDuration: 0.5, animations: {
+            self.tabBarController?.tabBar.frame = frame!
+        })
+    }
+    
+    // MARK: - Collection view methods
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return comments.count
     }
@@ -68,62 +130,7 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
         return 0
     }
     
-    fileprivate func fetchComments() {
-        guard let postId = post?.id else { return }
-        
-        let ref = Database.database().reference().child("comments").child(postId)
-        
-        ref.observe(.childAdded, with: { [weak self] snapshot in
-            guard let self = self else { return }
-            
-            guard let dictionary = snapshot.value as? [String: Any],
-                let uid = dictionary["uid"] as? String else { return }
-            
-            Database.fetchUserWithUID(uid: uid) { [weak self] user in
-                guard let self = self else { return }
-                
-                let comment = Comment(user: user, dictionary: dictionary)
-                self.comments.append(comment)
-                self.collectionView.reloadData()
-            }
-        }) { error in
-            print("Failed to fetch comments: \(error)")
-        }
-    }
-    
-    func hideTabBar() {
-        var frame = self.tabBarController?.tabBar.frame
-        frame!.origin.y = self.view.frame.size.height + (frame?.size.height)!
-        UIView.animate(withDuration: 0.5, animations: {
-            self.tabBarController?.tabBar.frame = frame!
-        })
-    }
-
-    func showTabBar() {
-        var frame = self.tabBarController?.tabBar.frame
-        frame!.origin.y = self.view.frame.size.height - (frame?.size.height)!
-        UIView.animate(withDuration: 0.5, animations: {
-            self.tabBarController?.tabBar.frame = frame!
-        })
-    }
-    
-    lazy var containerView: CommentInputAccessoryView = {
-        let frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 50)
-        let commentInputAccessoryView = CommentInputAccessoryView(frame: frame)
-        commentInputAccessoryView.delegate = self
-        return commentInputAccessoryView
-    }()
-    
-    override var inputAccessoryView: UIView? {
-        get {
-            return containerView
-        }
-    }
-    
-    override var canBecomeFirstResponder: Bool {
-        return true
-    }
-    
+    // MARK: - CommentInputAccessoryViewDelegate
     func didSubmit(for comment: String) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
