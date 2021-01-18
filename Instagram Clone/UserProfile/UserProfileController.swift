@@ -79,6 +79,25 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         }
     }
     
+    // MARK: - Fetch user
+    fileprivate func fetchUser() {
+        
+        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
+        
+        let uid = userId ?? currentUserUID
+        
+        Database.fetchUserWithUID(uid: uid) { [weak self] user in
+            guard let self = self else { return }
+            
+            self.user = user
+            self.navigationItem.title = self.user?.username
+            
+            self.collectionView?.reloadData()
+            
+            self.paginatePosts()
+        }
+    }
+    
     // MARK: - Log Out
     fileprivate func setupLogOutButton() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
@@ -92,6 +111,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
                 try Auth.auth().signOut()
                 let vc = LoginController()
                 let navController = UINavigationController(rootViewController: vc)
+                navController.modalPresentationStyle = .fullScreen
                 self.present(navController, animated: true, completion: nil)
                 
             } catch let signOutErr {
@@ -155,24 +175,6 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: view.frame.width, height: 200)
-    }
-    
-    fileprivate func fetchUser() {
-        
-        guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        
-        let uid = userId ?? currentUserUID
-        
-        Database.fetchUserWithUID(uid: uid) { [weak self] user in
-            guard let self = self else { return }
-            
-            self.user = user
-            self.navigationItem.title = self.user?.username
-            
-            self.collectionView?.reloadData()
-            
-            self.paginatePosts()
-        }
     }
     
     // MARK: - UserProfileHeaderDelegate
