@@ -18,6 +18,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         
         self.delegate = self
         
+        checkCurrentUser()
+        setupViewControllers()
+    }
+    
+    fileprivate func checkCurrentUser() {
         if Auth.auth().currentUser == nil {
             DispatchQueue.main.async {
                 let navController = UINavigationController(rootViewController: LoginController())
@@ -26,8 +31,6 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             }
             return
         }
-        
-        setupViewControllers()
     }
     
     func setupViewControllers() {
@@ -51,10 +54,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         viewController.view.backgroundColor = .white
         
         let navController = UINavigationController(rootViewController: viewController)
-
         navController.tabBarItem.image = UIImage(named: imageName)
         navController.tabBarItem.selectedImage = UIImage(named: selectedImageName)
-        
         tabBar.tintColor = .black
         
         return navController

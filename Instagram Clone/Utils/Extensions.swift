@@ -51,8 +51,7 @@ extension Date {
             unit = "month"
         }
         
-        return "\(quotient) \(unit)\(quotient == 1 ? "" : "s") ago"
-        
+        return "\(quotient) \(unit)\(quotient == 1 ? "" : "s") ago" 
     }
 }
 

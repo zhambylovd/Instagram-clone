@@ -13,6 +13,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     
     let cellId = "cellId"
     let homePostCellId = "homePostCellId"
+    let headerId = "headerId"
     
     var user: User?
     var userId: String?
@@ -27,8 +28,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         
         fetchUser()
         
-        collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "headerId")
-        
+        collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerId)
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
@@ -66,40 +66,13 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
                 guard let dictionary = snapshot.value as? [String: Any] else { return }
                 
                 var post = Post(user: user , dictionary: dictionary)
-                
                 post.id = snapshot.key
-                
                 self.posts.append(post)
             })
-            
-            self.posts.forEach { post in
-                print(post.id ?? "")
-            }
             
             self.collectionView.reloadData()
         }) { error in
             print("Failed to paginate for posts: \(error)")
-        }
-    }
-    
-    fileprivate func fetchOrderedPosts() {
-        guard let uid = self.user?.uid else { return }
-        let ref = Database.database().reference().child("posts").child(uid)
-        
-        //perhaps later on we'll implement some pagination of data
-        ref.queryOrdered(byChild: "creationDate").observe(.childAdded, with: { (snapshot) in
-            guard let dictionary = snapshot.value as? [String: Any] else { return }
-            
-            guard let user = self.user else { return }
-            
-            let post = Post(user: user, dictionary: dictionary)
-            
-            self.posts.insert(post, at: 0)
-            
-            self.collectionView?.reloadData()
-            
-        }) { (err) in
-            print("Failed to fetch ordered posts:", err)
         }
     }
     
@@ -111,24 +84,18 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
-            
             do {
                 try Auth.auth().signOut()
-                
-                //what happens? we need to present some kind of login controller
-                let loginController = LoginController()
-                let navController = UINavigationController(rootViewController: loginController)
+                let vc = LoginController()
+                let navController = UINavigationController(rootViewController: vc)
                 self.present(navController, animated: true, completion: nil)
                 
             } catch let signOutErr {
                 print("Failed to sign out:", signOutErr)
             }
-            
-            
         }))
         
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
         present(alertController, animated: true, completion: nil)
     }
     
@@ -162,7 +129,6 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
         if isGridView {
             let width = (view.frame.width - 2) / 3
             return CGSize(width: width, height: width)
@@ -173,7 +139,7 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
     }
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerId", for: indexPath) as! UserProfileHeader
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! UserProfileHeader
         
         header.user = self.user
         header.delegate = self

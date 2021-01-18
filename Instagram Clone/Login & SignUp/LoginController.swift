@@ -33,6 +33,7 @@ class LoginController: UIViewController {
         field.borderStyle = .roundedRect
         field.font = UIFont.systemFont(ofSize: 14)
         field.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        field.returnKeyType = .continue
         return field
     }()
     
@@ -44,6 +45,7 @@ class LoginController: UIViewController {
         field.borderStyle = .roundedRect
         field.font = UIFont.systemFont(ofSize: 14)
         field.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        field.returnKeyType = .go
         return field
     }()
     
@@ -84,6 +86,12 @@ class LoginController: UIViewController {
         
         navigationController?.navigationBar.isHidden = true
         
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        
+        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
+        view.addGestureRecognizer(tap)
+        
         view.addSubview(logoContainerView)
         logoContainerView.anchor(top: view.topAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, size: .init(width: 0, height: 200))
         
@@ -123,12 +131,20 @@ class LoginController: UIViewController {
     }
     
     @objc func handleLogin() {
+        emailTextField.resignFirstResponder()
+        passwordTextField.resignFirstResponder()
+        
         guard let email = emailTextField.text, let password = passwordTextField.text else { return }
         
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] (result, error) in
             guard let self = self else { return }
             
             guard let result = result, error == nil else {
+                guard let message = error?.localizedDescription else { return }
+                
+                self.alertLoginError(message: message)
+                self.emailTextField.text = nil
+                self.passwordTextField.text = nil
                 print("Failed to sign in with email: \(String(describing: error))")
                 return
             }
@@ -151,8 +167,24 @@ class LoginController: UIViewController {
                 
                 mainTabBarController.setupViewControllers()
             }
-            
             self.dismiss(animated: true, completion: nil)
         }
+    }
+    
+    fileprivate func alertLoginError(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
+        present(alert, animated: true)
+    }
+}
+
+extension LoginController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            handleLogin()
+        }
+        return true
     }
 }

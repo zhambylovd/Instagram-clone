@@ -28,6 +28,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         field.borderStyle = .roundedRect
         field.font = UIFont.systemFont(ofSize: 14)
         field.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        field.returnKeyType = .continue
         return field
     }()
     
@@ -38,6 +39,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         field.borderStyle = .roundedRect
         field.font = UIFont.systemFont(ofSize: 14)
         field.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        field.returnKeyType = .continue
         return field
     }()
     
@@ -49,6 +51,7 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         field.borderStyle = .roundedRect
         field.font = UIFont.systemFont(ofSize: 14)
         field.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        field.returnKeyType = .go
         return field
     }()
     
@@ -78,11 +81,38 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         return button
     }()
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = .white
+        
+        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
+        view.addGestureRecognizer(tap)
+        
+        view.addSubview(plusPhotoButton)
+        view.addSubview(alreadyHaveAccountButton)
+        
+        emailTextField.delegate = self
+        usernameTextField.delegate = self
+        passwordTextField.delegate = self
+        
+        plusPhotoButton.anchor(top: view.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: view.frame.height/5, left: 0, bottom: 0, right: 0), size: .init(width: 140, height: 140))
+        plusPhotoButton.centerXInSuperview()
+        
+        alreadyHaveAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 40, right: 0),size: .init(width: 0, height: 50))
+        
+        setupInputFields()
+    }
+    
     @objc func handleAlreadyHaveAccount() {
         navigationController?.popViewController(animated: true)
     }
     
     @objc func handleSignUp() {
+        emailTextField.resignFirstResponder()
+        usernameTextField.resignFirstResponder()
+        passwordTextField.resignFirstResponder()
+        
         guard let email = emailTextField.text, !email.isEmpty,
             let username = usernameTextField.text, !username.isEmpty,
             let password = passwordTextField.text, password.count >= 6 else { return }
@@ -92,6 +122,12 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
             guard let self = self else { return }
             
             guard let result = result, error == nil else {
+                self.emailTextField.text = nil
+                self.usernameTextField.text = nil
+                self.passwordTextField.text = nil
+                
+                guard let message = error?.localizedDescription else { return }
+                self.alertSignUpError(message: message)
                 print("Failed to create user: \(String(describing: error))")
                 return
             }
@@ -135,6 +171,12 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         }
     }
     
+    fileprivate func alertSignUpError(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .destructive, handler: nil))
+        present(alert, animated: true)
+    }
+    
     fileprivate func saveToDatabaseUserInfo(values: [String: Any]) {
         FirebaseDatabase.Database.database().reference().child("users").updateChildValues(values) { (error, ref) in
             if let error = error {
@@ -156,7 +198,6 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
                 
                 mainTabBarController.setupViewControllers()
             } else {
-                // Fallback on earlier versions
                 guard let mainTabBarController = UIApplication.shared.keyWindow?.rootViewController as? MainTabBarController else { return }
                 
                 mainTabBarController.setupViewControllers()
@@ -203,25 +244,8 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
         
         dismiss(animated: true, completion: nil)
     }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = .white
-        
-        view.addSubview(plusPhotoButton)
-        plusPhotoButton.anchor(top: view.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: view.frame.height/5, left: 0, bottom: 0, right: 0), size: .init(width: 140, height: 140))
-        plusPhotoButton.centerXInSuperview()
-        
-        view.addSubview(alreadyHaveAccountButton)
-        alreadyHaveAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 40, right: 0),size: .init(width: 0, height: 50))
-        
-        setupInputFields()
-        
-    }
     
     fileprivate func setupInputFields() {
-        
         let stackView = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signUpButton])
         stackView.axis = .vertical
         stackView.spacing = 10
@@ -234,3 +258,15 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
     }
 }
 
+extension SignUpController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField {
+            usernameTextField.becomeFirstResponder()
+        } else if textField == usernameTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            handleSignUp()
+        }
+        return true
+    }
+}
