@@ -8,10 +8,13 @@
 
 import UIKit
 import Firebase
+import JGProgressHUD
 
 class LoginController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Properties
+    private let spinner = JGProgressHUD(style: .dark)
+    
     let logoContainerView: UIView = {
         let view = UIView()
         
@@ -148,8 +151,14 @@ class LoginController: UIViewController, UITextFieldDelegate {
         
         guard let email = emailTextField.text, let password = passwordTextField.text else { return }
         
+        spinner.show(in: view)
+        
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] (result, error) in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.spinner.dismiss()
+            }
             
             guard let result = result, error == nil else {
                 guard let message = error?.localizedDescription else { return }

@@ -76,6 +76,7 @@ class CommentsController: BaseListController, UICollectionViewDelegateFlowLayout
                 
                 let comment = Comment(user: user, dictionary: dictionary)
                 self.comments.append(comment)
+                self.collectionView.scrollToLast()
                 self.collectionView.reloadData()
             }
         }) { error in

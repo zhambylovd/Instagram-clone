@@ -10,10 +10,13 @@ import UIKit
 import FirebaseAuth
 import FirebaseDatabase
 import FirebaseStorage
+import JGProgressHUD
 
 class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     // MARK: - Properties
+    private let spinner = JGProgressHUD(style: .dark)
+    
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         let image = UIImage(named: "plus_photo")
@@ -135,9 +138,14 @@ class SignUpController: UIViewController, UIImagePickerControllerDelegate, UINav
             let username = usernameTextField.text, !username.isEmpty,
             let password = passwordTextField.text, password.count >= 6 else { return }
         
+        spinner.show(in: view)
+        
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] (result, error) in
-            
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.spinner.dismiss()
+            }
             
             guard let result = result, error == nil else {
                 self.emailTextField.text = nil

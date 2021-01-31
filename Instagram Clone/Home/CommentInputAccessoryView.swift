@@ -12,7 +12,7 @@ protocol CommentInputAccessoryViewDelegate {
     func didSubmit(for comment: String)
 }
 
-class CommentInputAccessoryView: UIView {
+class CommentInputAccessoryView: UIView, UITextViewDelegate {
     
     // MARK: - Properties
     var delegate: CommentInputAccessoryViewDelegate?
@@ -26,14 +26,23 @@ class CommentInputAccessoryView: UIView {
         return button
     }()
     
-    fileprivate let commentTextView: UITextView = {
+    fileprivate let textView: UITextView = {
         let tv = UITextView()
+        tv.text = "Text Comment"
+        tv.textColor = UIColor.lightGray
         tv.isScrollEnabled = false
         tv.font = .systemFont(ofSize: 18)
         return tv
     }()
     
-    // MARK: - Override properties
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.textColor == UIColor.lightGray {
+            textView.text = nil
+            textView.textColor = UIColor.black
+        }
+    }
+    
+    
     override var intrinsicContentSize: CGSize {
         return .zero
     }
@@ -42,16 +51,18 @@ class CommentInputAccessoryView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        textView.delegate = self
+        
         autoresizingMask = .flexibleHeight
         
         backgroundColor = .white
         
         addSubview(submitButton)
-        addSubview(commentTextView)
+        addSubview(textView)
         
         submitButton.anchor(top: topAnchor, leading: nil, bottom: nil, trailing: trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 50))
         
-        commentTextView.anchor(top: topAnchor, leading: leadingAnchor, bottom: safeAreaLayoutGuide.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 8, left: 8, bottom: 8, right: 0))
+        textView.anchor(top: topAnchor, leading: leadingAnchor, bottom: safeAreaLayoutGuide.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 8, left: 8, bottom: 8, right: 0))
         
         setupLineSeparatorView()
     }
@@ -62,7 +73,7 @@ class CommentInputAccessoryView: UIView {
     
     // MARK: - Some methods
     func clearCommentTextField() {
-        commentTextView.text = nil
+        textView.text = nil
     }
     
     fileprivate func setupLineSeparatorView() {
@@ -75,7 +86,7 @@ class CommentInputAccessoryView: UIView {
     
     // MARK: - Action functions
     @objc func handleSubmit() {
-        guard let comment = commentTextView.text else { return }
+        guard let comment = textView.text else { return }
         
         delegate?.didSubmit(for: comment)
     }

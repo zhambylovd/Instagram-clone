@@ -48,6 +48,7 @@ PODS:
   - GoogleUtilities/Reachability (7.1.1):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.5.0)
+  - JGProgressHUD (2.2)
   - leveldb-library (1.22)
   - nanopb (2.30906.0):
     - nanopb/decode (= 2.30906.0)
@@ -60,6 +61,7 @@ DEPENDENCIES:
   - Firebase/Auth
   - Firebase/Database
   - Firebase/Storage
+  - JGProgressHUD
 
 SPEC REPOS:
   trunk:
@@ -72,6 +74,7 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleUtilities
     - GTMSessionFetcher
+    - JGProgressHUD
     - leveldb-library
     - nanopb
     - PromisesObjC
@@ -86,10 +89,11 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 116c84c4bdeb76be2a7a46de51244368f9794eab
   GoogleUtilities: 3dc4ff0d5e4840e2fa8eef0889620e8c33d4218c
   GTMSessionFetcher: b3503b20a988c4e20cc189aa798fd18220133f52
+  JGProgressHUD: d83d7a981b85d11205e19ff8ad5bb9c40571c847
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   nanopb: 1bf24dd71191072e120b83dd02d08f3da0d65e53
   PromisesObjC: 8c196f5a328c2cba3e74624585467a557dcb482f
 
-PODFILE CHECKSUM: 012abaf770c9bda47cf718e1dd34fc9464fa323c
+PODFILE CHECKSUM: 6d00da91306d808c1e64fd6399848f986ac19577
 
 COCOAPODS: 1.10.0
