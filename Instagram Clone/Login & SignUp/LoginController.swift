@@ -117,7 +117,7 @@ class LoginController: UIViewController, UITextFieldDelegate {
         
         view.addSubview(stackView)
         
-        stackView.anchor(top: logoContainerView.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 120, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 140))
+        stackView.anchor(top: logoContainerView.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 80, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 140))
     }
     
     fileprivate func alertLoginError(message: String) {

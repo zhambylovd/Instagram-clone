@@ -120,6 +120,7 @@ class SharePhotoController: UIViewController {
                 print("Successfully uploaded post image: \(urlString)")
                 
                 self.saveToDatabaseWithImageUrl(imageUrl: urlString, postImage: image, caption: caption)
+                self.textView.resignFirstResponder()
             }
         }
     }

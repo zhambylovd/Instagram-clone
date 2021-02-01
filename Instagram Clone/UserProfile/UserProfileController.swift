@@ -27,14 +27,24 @@ class UserProfileController: BaseListController, UICollectionViewDelegateFlowLay
         super.viewDidLoad()
         
         collectionView?.backgroundColor = .white
-        
-        fetchUser()
-        
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerId)
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        
+        fetchUser()
         setupLogOutButton()
+    }
+    
+    @objc func handleUpdateFeed() {
+        handleRefresh()
+    }
+    
+    @objc func handleRefresh() {
+        print("Refreshing...")
+        posts.removeAll()
+        paginatePosts()
     }
     
     // MARK: - Pagination
