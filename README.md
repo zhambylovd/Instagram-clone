@@ -2,10 +2,10 @@
 
 ## Requirements
 
-• Xcode version 11.7+
-• Swift 5
-• iPhone 8 or higher
-• iOS 12.0+
+- Xcode version 11.7+
+- Swift 5
+- iPhone 8 or higher
+- iOS 12.0+
 
 
 ## Installation
